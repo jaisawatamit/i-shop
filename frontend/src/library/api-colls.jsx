@@ -179,12 +179,12 @@ const getOrders = (page = null, limit = null) => {
         )
 }
 
-const getUsers = () => {
-    return axiosInstance.get("/user") // Ensure this matches the backend route ("/")
-        .then((response) => response.data.data) // Extract the `data` field from the response
+const getUsers = (page) => {
+    return axiosInstance.get(`/user?page=${page}`) // Use template literals for clarity
+        .then((response) => response.data)
         .catch((error) => {
             console.error("Error fetching users:", error);
-            throw error; // Re-throw the error to handle it in the component
+            throw error;
         });
 };
 

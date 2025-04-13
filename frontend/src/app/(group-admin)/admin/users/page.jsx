@@ -1,6 +1,7 @@
 "use client"
 import { getUsers } from "@/library/api-colls";
 import React, { useEffect, useState } from "react";
+import Paginations from "@/componants/admin/Paginations";  // Import the Paginations component
 // Import the getUsers function
 
 const UsersPage =  () => {
@@ -10,11 +11,14 @@ const UsersPage =  () => {
     const [loading, setLoading] = useState(true); // State to track loading status
     const [error, setError] = useState(null); // State to handle errors
     const [visiblePasswords, setVisiblePasswords] = useState({}); // Track password visibility for each user
+    const [page, setPage] = useState(1); // State to manage pagination
+    const [totalPages, setTotalPages] = useState(""); // State to manage total pages
     const fetchUsers = async () => {
         try {
-            const data = await getUsers();
-            console.log("Fetched users:", data); // Log the fetched data
-            setUsers(data);
+            const response = await getUsers(page);
+            // console.log("Fetched users:", data); // Log the fetched data
+            setUsers(response.data);   
+            setTotalPages(response.totalPages); // Set total pages for pagination         
         } catch (err) {
             setError(err.message || "An error occurred while fetching users");
         } finally {
@@ -23,7 +27,7 @@ const UsersPage =  () => {
     };
     useEffect(() => {
         fetchUsers();
-    }, []); // Empty dependency array ensures this runs only once on mount
+    }, [page]); // Empty dependency array ensures this runs only once on mount
 
     if (loading) {
         return <div className="text-center text-white">Loading...</div>;
@@ -78,7 +82,7 @@ const UsersPage =  () => {
                             {users.length > 0 ? (
                                 users.map((user, index) => (
                                     <tr key={user._id} className="text-center bg-white border-b hover:bg-gray-200">
-                                        <td className="px-5 py-5 text-sm">{index + 1}</td>
+                                        <td className="px-5 py-5 text-sm">{(page - 1) * 10 + index + 1}</td>
                                         <td className="px-5 py-5 text-sm">{user._id}</td>
                                         <td className="px-5 py-5 text-sm">{user.name}</td>
                                         <td className="px-5 py-5 text-sm">{user.email}</td>
@@ -138,6 +142,9 @@ const UsersPage =  () => {
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div style={{display:"flex", justifyContent:"center", padding: "1rem, 0", background:"#cccc"}}>
+                <Paginations totalPages={totalPages} setPage={setPage}/>
             </div>
         </div>
     );

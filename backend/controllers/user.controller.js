@@ -15,13 +15,19 @@ const UserController = {
     //      res.status(200).json({ error: 'Internal Server Error' });
     //     }
     //  },
-     read: async (req, res) => {
+    read: async (req, res) => {
+        const page = parseInt(req.query.page) || 1; // Get the page number from request body, default to 1
+        const limit = 10; // Get the limit from request body, default to 10
         try {
-            const users = await User.find(); // Fetch all users from the database
+            const users = await User.find().skip((page - 1) * limit).limit(limit); // Fetch all users from the database
+            const totalCount = await User.countDocuments(); // Get total user count
             return res.status(200).json({
                 success: true,
-                message: "Users fetched successfully",
+                message: "Users fetched successfully" ,
                 data: users,
+                totalCount, // Total number of users
+                currentPage: page,
+                totalPages: Math.ceil(totalCount / limit),
             });
         } catch (error) {
             console.error("Error fetching users:", error);
@@ -36,34 +42,34 @@ const UserController = {
         try {
             const { id } = req.params; // Get user ID from request params
             const { index, address } = req.body; // Get the index of the address to edit and updated address data
-    
+
             if (!id || index === undefined || !address) {
                 return res.status(400).json({ flag: 0, message: "Invalid request data" });
             }
-    
+
             // Find user by ID
             const user = await User.findById(id);
             if (!user) {
                 return res.status(404).json({ flag: 0, message: "User not found" });
             }
-    
+
             // Check if the provided index exists in the addresses array
             if (index < 0 || index >= user.address.length) {
                 return res.status(400).json({ flag: 0, message: "Invalid address index" });
             }
-    
+
             // Update the address at the specified index
             user.address[index] = { ...user.address[index], ...address, updatedAt: new Date() };
-    
+
             // Save updated user data
             await user.save();
-    
+
             res.json({
                 flag: 1,
                 message: "Address edited successfully",
                 user,
             });
-    
+
         } catch (error) {
             console.error("Error editing address:", error);
             res.status(500).json({ flag: 0, message: "Internal server error" });
