@@ -43,7 +43,7 @@ const AddCategoryPage = () => {
             name: name.current.value,
             slug: slug.current.value
         }
-        console.log(data);
+        // console.log(data);
         axiosInstance.post(`/category/create`, data)
             .then((responce) => {
                 if (responce.data.flag == 1) {
